@@ -1,57 +1,46 @@
 
 import sys, pandas as pd
+import os, os.path
 import numpy as np
 import utils.arcnah as arcno
+from utils.dathandler import datReader
+
 """
 # TODO:
-- handling multirow header in ingest to pg 
+- handling multirow header in ingest to pg
 """
 
-class datReader:
-    arrays = []
-    header = None
-    df = None
-
-    def __init__(self, path):
-        """
-        prepping the multirow header
-        1. reads the first 4 lines of the .dat file
-        2. gets each line into an list of lists
-        3. appends 16 spaces to the first list
-        4. create tuples with the list of lists
-        5. create a multiindex with those tuples
-        6. append created header to headless df
-
-        """
-        self.arrays = []
-        self.header = None
-        self.df = None
-        with open(path, 'r') as reader:
-            all_lines = reader.readlines()
-            for each_line in all_lines[:4]:
-                split_line = each_line.split(",")
-                self.arrays.append([each_character.replace("\"","") for each_character in split_line])
-        missing_spaces = ['','','','','','','','','','','','','','','','']
-
-        for eachspace in missing_spaces:
-            self.arrays[0].append(eachspace)
-
-        tuples = list(zip(*self.arrays))
-
-        self.header = pd.MultiIndex.from_tuples(tuples)
-
-        self.df = pd.read_table(path, sep=",", skiprows=4, low_memory=False)
-
-        self.df.columns = self.header
-        self.getdf()
-
-    def getdf(self):
-        return self.df
+# def fun1(arg1,arg2):
+#     arg1+='arg1'
+#     arg2+='arg2'
+#     return arg1,arg2
+# (var1, var2) =fun1('a_','b_')
+# var1
+# var2
+dir_upper = r""
+# dir_lower = os.path.join()
+for dr in os.listdir(dir):
+    # if 'Akron' in dr: # has to be list of allowed values/ or disallowed ones
+    #     dir_lower = os.path.join(dir_upper, dr)
+    #     for i in os.listdir(dir_lower):
+    #         if os.path.splitext(i)[1]=='.dat':
+    #             path_to_send = os.path.join(dir_lower,i)
+    #             print(path_to_send)
+    #             # datreader processes,
+    #             # dathandler would get it ready.
+    #             a = datReader(os.path.join(dir_lower,i))
+    if 'JER' in dr:
+        dir_lower = os.path.join(dir_upper, dr)
+        for i in os.listdir(dir_lower):
+            if os.path.splitext(i)[1]=='.dat':
+                path_to_send = os.path.join(dir_lower,i)
+                if "DustTrak" in i:
+                    a = datReader(os.path.join(dir_lower,i))
 
 
 
-
-
+# indexing strategies in the age of multirow headers
+a.df
 
 
 
