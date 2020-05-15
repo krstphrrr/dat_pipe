@@ -87,7 +87,7 @@ class datReader:
         # # self.getdf()
 
     def getdf(self):
-        
+
         print("fixing '\\n' in field names..")
         for i in self.df.columns:
             if '\n' in i:
@@ -110,7 +110,7 @@ class datReader:
         for i in self.df.columns:
             if 'TIMESTAMP' in i:
                 self.df.TIMESTAMP = pd.to_datetime(self.df.TIMESTAMP)
-        print("limiting preci")
+
         for i in self.df.columns:
             if 'Albedo_Avg' in i:
                 self.df.Albedo_Avg = self.df.Albedo_Avg.astype(float)
