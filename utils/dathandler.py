@@ -1,14 +1,14 @@
-from pandas.io.sql import SQLTable
+# from pandas.io.sql import SQLTable
+#
+# def _execute_insert(self, conn, keys, data_iter):
+#     print("Using monkey-patched _execute_insert")
+#     data = [dict(zip(keys, row)) for row in data_iter]
+#     conn.execute(self.table.insert().values(data))
 
-def _execute_insert(self, conn, keys, data_iter):
-    print("Using monkey-patched _execute_insert")
-    data = [dict(zip(keys, row)) for row in data_iter]
-    conn.execute(self.table.insert().values(data))
-
-SQLTable._execute_insert = _execute_insert
+# SQLTable._execute_insert = _execute_insert
 
 import pandas as pd
-
+import numpy as np
 import sys, pandas as pd
 import os, os.path
 import numpy as np
@@ -87,6 +87,36 @@ class datReader:
         # # self.getdf()
 
     def getdf(self):
+        
+        print("fixing '\\n' in field names..")
+        for i in self.df.columns:
+            if '\n' in i:
+                self.df.rename(columns={f'{i}':'{0}'.format(i.replace("\n",""))}, inplace=True)
+        print("fixing float precision..")
+        for i in self.df.columns:
+            if self.df[i].dtype =='float64':
+                self.df.round({f'{i}':6})
+        print("fixing slash characters in field name..")
+        for i in self.df.columns:
+            print(i,"pre slash taker")
+            if '/' in i:
+                self.df.rename(columns={f'{i}':'{0}'.format(i.replace("/","_"))}, inplace=True)
+            print(i, "post slash")
+        print("fixing '.' characters in field name..")
+        for i in self.df.columns:
+            if '.' in i:
+                self.df.rename(columns={f'{i}':'{0}'.format(i.replace(".",""))}, inplace=True)
+        print("casting timestamp as datetime..")
+        for i in self.df.columns:
+            if 'TIMESTAMP' in i:
+                self.df.TIMESTAMP = pd.to_datetime(self.df.TIMESTAMP)
+        print("limiting preci")
+        for i in self.df.columns:
+            if 'Albedo_Avg' in i:
+                self.df.Albedo_Avg = self.df.Albedo_Avg.astype(float)
+                self.df.Albedo_Avg = self.df.Albedo_Avg.apply(lambda x: np.nan if (x==np.inf) or (x==-np.inf) else x)
+
+
         # with self.engine.connect() as con:
         #     cols = []
         #     res = con.execute(f'SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = \'{"MET_data"}\';')
@@ -119,18 +149,21 @@ class datReader:
         try:
             print(f" reading...{os.path.splitext(os.path.basename(self.path))[0]}")
             # chunksize = int(len(df)/10)
-            # tqdm.write(f'sending {tablename}')
-            #
-            # with tqdm(total=len(df)) as pbar:
-            #     for i, cdf in enumerate(chunker(df, chunksize)):
-            #         # replace = "replace" if i == 0 else "append"
 
-            df.to_sql(name=f'{tablename}',schema='metdb', con=self.engine, index=False, if_exists="append", method="multi")
+
+            # with tqdm(total=len(df)) as pbar:
+            #     tqdm.write(f'sending {tablename}')
+            #     for i, cdf in enumerate(chunker(df, chunksize)):
+                    # replace = "replace" if i == 0 else "append"
+
+            df.to_sql(name=f'{tablename}',schema='metdb', con=self.engine, index=False, if_exists="append")
                     # pbar.update(chunksize)
                     # tqdm._instances.clear()
             print(f" finished with...{os.path.splitext(os.path.basename(self.path))[0]}")
         except Exception as e:
             print(e)
+
+
 
     def _adding_column(self,column):
         with self.engine.connect() as con:

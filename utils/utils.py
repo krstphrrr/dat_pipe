@@ -48,6 +48,8 @@ class db:
     # str = connect(**params)
     str_1 = SimpleConnectionPool(minconn=1,maxconn=5,**params)
     str = str_1.getconn()
+    str_2 = SimpleConnectionPool(minconn=1,maxconn=5,**params)
+    str2 = str_2.getconn()
 
     def __init__(self):
 
